@@ -84,7 +84,7 @@ const openai = new OpenAI({
 });
 
 const extractSentences = (rawSentences: string) => {
-  const regex = /\(([^)]+)\)/g;
+  const regex = /\<([^>]+)\)/g;
 
   // Extract and return all matches
   const sentences = [];
