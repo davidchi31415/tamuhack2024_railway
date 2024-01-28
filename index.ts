@@ -256,9 +256,9 @@ const jobWorker = new Worker("job",
 
     const { story, prompts } = await getScript({ prompt: storyPrompt });
     await prismadb.job.update({ where: { id: jobId }, data: { done_text: true }});
-    await getImages({ prompts });
+    await getImages({ prompts, jobId });
     await prismadb.job.update({ where: { id: jobId }, data: { done_image: true }});
-    await getAudios({ story });
+    await getAudios({ story, jobId });
     await prismadb.job.update({ where: { id: jobId }, data: { done_audio: true }});
 
     return 'Job processed';
