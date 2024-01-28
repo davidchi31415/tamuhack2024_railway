@@ -48,7 +48,7 @@ const uploadScriptToFile = async ({ story, jobId }: {story: string[], jobId: str
   const script = story.join("|||||");
   const file = bucket.file(`${jobId}/script.txt`);
 
-  await file.save(script).then(() => console.log("Saved script"));
+  await file.save(script).then(() => console.log("Saved script")).catch(err => { throw new Error("Failed to upload script") });
 }
 
 const uploadByteToFile = async ({ data, title, jobId }: {data: any, title: string, jobId: string}) => {    
@@ -99,8 +99,8 @@ const extractSentences = (rawSentences: string) => {
 const getScript = async ({ prompt }: {prompt: string}) => {
   const messages: any = [
     { role: 'user', content: `You are a narrator for a children's educational story. The topic is to explain ${prompt} through a story that is both entertaining and understandable to a child. There is a main character named Pusheen in this story who has to discover the lesson about ${prompt}. This character is a cute cat who represents the child wanting to learn.
-    **Write the story as a series of FOUR scenes each enclosed within arrow brackets < and >.
-    DO NOT ADD TITLES TO EACH SCENE. DO NOT GO OVER FOUR SCENES. You will be *penalized* for adding extra commentary or titles (e.g., describing as "Scene 1" for each scene or for forgetting the numbering) and you will be heavily penalized for adding more than FOUR scenes.
+    **Write the story as a series of THREE scenes each enclosed within arrow brackets < and >.
+    DO NOT ADD TITLES TO EACH SCENE. DO NOT GO OVER THREE SCENES. You will be *penalized* for adding extra commentary or titles (e.g., describing as "Scene 1" for each scene or for forgetting the numbering) and you will be heavily penalized for adding more than THREE scenes.
     For example,
     <Pusheen woke up>
     <Pusheen did something>
@@ -125,7 +125,7 @@ const getScript = async ({ prompt }: {prompt: string}) => {
     role: 'user',
     content: `Describe each scene  in vivid but CONCISE details. Do NOT use complete sentences - instead, describe what Pusheen is doing and where she is / her environment. 
     You will be *penalized* heavily for being too wordy or deviating from this format. Please follow the same format as before with each scene's response enclosed within arrow brackets < and >. For example,
-    You will be *penalized* for adding extra commentary or describing a title for each scene and you will additionally be penalized for adding more than FOUR scenes.
+    You will be *penalized* for adding extra commentary or describing a title for each scene and you will additionally be penalized for adding more than THREE scenes.
     IT IS ESSENTIAL that you follow the correct format with arrow brackets enclosing everything including dialogue in EACH SCENE.
     For example,
     <Pusheen sitting on a couch, bright morning, sun shining>
