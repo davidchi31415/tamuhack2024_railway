@@ -135,10 +135,7 @@ const getScript = async ({ prompt }: {prompt: string}) => {
   const story = extractSentences(storyString!);
   const prompts = extractSentences(promptsString!);
 
-  await getImages({ prompts });
-  await getAudios({ story });
-
-  return { story: [], prompts: [] };
+  return { story, prompts };
 }
 
 /////////////////////////////
@@ -257,8 +254,11 @@ const jobWorker = new Worker("job",
     const storyPrompt = job.prompt;
 
     const { story, prompts } = await getScript({ prompt: storyPrompt });
+    await prismadb.job.update({ where: { id: jobId }, data: { done_text: true }});
     await getImages({ prompts });
-    // await getAudios({ prompts });
+    await prismadb.job.update({ where: { id: jobId }, data: { done_image: true }});
+    await getAudios({ story });
+    await prismadb.job.update({ where: { id: jobId }, data: { done_audio: true }});
 
     return 'Job processed';
   }, 
