@@ -232,6 +232,27 @@ const getAudios = async ({ story, jobId }: {story: string[], jobId: string}) => 
  );
 }
 
+/////////////////////////////
+// GCP API
+/////////////////////////////
+
+const getVideo = async ({ jobId }: {jobId: string}) => {
+  await axios.post(
+    "https://us-central1-pusheenai.cloudfunctions.net/video-parser",
+    {
+      "jobId": jobId
+    }, {
+      "headers": {
+        "Content-Type": "application/json"
+      }
+    }
+  ).then(
+    () => console.log("Video processed")
+  ).catch(err => {
+    throw new Error("Error processing video");
+  });
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Bull
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -260,6 +281,8 @@ const jobWorker = new Worker("job",
     await prismadb.job.update({ where: { id: jobId }, data: { done_image: true }});
     await getAudios({ story, jobId });
     await prismadb.job.update({ where: { id: jobId }, data: { done_audio: true }});
+    await getVideo({ jobId });
+    await prismadb.job.update({ where: { id: jobId }, data: { done_video: true }});
 
     return 'Job processed';
   }, 
