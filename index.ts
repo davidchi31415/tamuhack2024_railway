@@ -44,15 +44,15 @@ const storage = new Storage(storageOptions);
 const bucketName = "pusheen";
 const bucket = storage.bucket(bucketName);
 
-const uploadByteToFile = async ({ data, title }: {data: any, title: string}) => {    
-  const file = bucket.file(title);
+const uploadByteToFile = async ({ data, title, jobId }: {data: any, title: string, jobId: string}) => {    
+  const file = bucket.file(`${jobId}/${title}`);
   const contents = Buffer.from(data.replace(/^data:image\/(png|gif|jpeg);base64,/, ''), 'base64');
   
   await file.save(contents).then(() => console.log(`Saved ${title}`));
 }
 
-const uploadAudioByteToFile = async ({ data, title }: {data: any, title: string}) => {    
-  const file = bucket.file(title);
+const uploadAudioByteToFile = async ({ data, title, jobId }: {data: any, title: string, jobId: string}) => {    
+  const file = bucket.file(`${jobId}/${title}`);
   await file.save(data).then(() => console.log(`Saved ${title}`));
 }
 
@@ -142,7 +142,7 @@ const getScript = async ({ prompt }: {prompt: string}) => {
 // SD API
 /////////////////////////////
 
-const getImage = async ({ prompt, sceneNumber }: {prompt: string, sceneNumber: number}) => {
+const getImage = async ({ prompt, sceneNumber, jobId }: {prompt: string, sceneNumber: number, jobId: string}) => {
   const params = {
     "api": {
       "method": "POST",
@@ -178,17 +178,18 @@ const getImage = async ({ prompt, sceneNumber }: {prompt: string, sceneNumber: n
   .then(async (res) => {
     await uploadByteToFile({
       data: res.data.output?.images[0],
-      title: `scene_${sceneNumber}.jpg`
+      title: `scene_${sceneNumber}.jpg`,
+      jobId
     });
   }).catch(() => {
     throw new Error(`Failed to process image ${sceneNumber}`);
   });
 }
 
-const getImages = async ({ prompts }: { prompts: string[] }) => {
+const getImages = async ({ prompts, jobId }: { prompts: string[], jobId: string }) => {
   await Promise.all(
     prompts.map((prompt, index) => {
-      return getImage({ prompt, sceneNumber: index });
+      return getImage({ prompt, sceneNumber: index, jobId });
     })
  );
 }
@@ -197,7 +198,7 @@ const getImages = async ({ prompts }: { prompts: string[] }) => {
 // ELABS API
 /////////////////////////////
 
-const getAudio = async ({ scene, sceneNumber }: { scene: string, sceneNumber: number }) => {
+const getAudio = async ({ scene, sceneNumber, jobId }: { scene: string, sceneNumber: number, jobId: string }) => {
   let params = {
     "model_id": "eleven_monolingual_v1",
     "text": scene, 
@@ -218,15 +219,15 @@ const getAudio = async ({ scene, sceneNumber }: { scene: string, sceneNumber: nu
     }
   )
     .then(async (response) => {
-      await uploadAudioByteToFile({ data: response.data, title: `scene_${sceneNumber}.mp3` });
+      await uploadAudioByteToFile({ data: response.data, title: `scene_${sceneNumber}.mp3`, jobId });
     })
     .catch((err) => console.error(err));
 }
 
-const getAudios = async ({ story }: {story: string[]}) => {
+const getAudios = async ({ story, jobId }: {story: string[], jobId: string}) => {
   await Promise.all(
     story.map((scene, index) => {
-      return getAudio({ scene, sceneNumber: index });
+      return getAudio({ scene, sceneNumber: index, jobId });
     })
  );
 }
