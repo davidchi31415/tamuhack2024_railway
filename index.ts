@@ -44,6 +44,13 @@ const storage = new Storage(storageOptions);
 const bucketName = "pusheen";
 const bucket = storage.bucket(bucketName);
 
+const uploadScriptToFile = async ({ story, jobId }: {story: string[], jobId: string}) => {
+  const script = story.join("|||||");
+  const file = bucket.file(`${jobId}/script.txt`);
+
+  await file.save(script).then(() => console.log("Saved script"));
+}
+
 const uploadByteToFile = async ({ data, title, jobId }: {data: any, title: string, jobId: string}) => {    
   const file = bucket.file(`${jobId}/${title}`);
   const contents = Buffer.from(data.replace(/^data:image\/(png|gif|jpeg);base64,/, ''), 'base64');
@@ -276,8 +283,8 @@ const jobWorker = new Worker("job",
     const storyPrompt = job.prompt;
 
     const { story, prompts } = await getScript({ prompt: storyPrompt });
-    const script = story.join("|||||");
-    await prismadb.job.update({ where: { id: jobId }, data: { script }});
+    
+    await uploadScriptToFile({ story, jobId });
     await prismadb.job.update({ where: { id: jobId }, data: { done_text: true }});
     await getImages({ prompts, jobId });
     await prismadb.job.update({ where: { id: jobId }, data: { done_image: true }});
