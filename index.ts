@@ -64,10 +64,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY, // This is the default and can be omitted
 });
 
-/////////////////////////////
-// SD API
-/////////////////////////////
-
 const queryGPT = async ({ message }: {message: string}) => {
   const chatCompletion = await openai.chat.completions.create({
     messages: [{ role: 'user', content: message }],
@@ -88,8 +84,16 @@ const getScript = async ({ prompt }: {prompt: string}) => {
 }
 
 /////////////////////////////
+// SD API
+/////////////////////////////
+
+
+
+/////////////////////////////
 // ELABS API
 /////////////////////////////
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Bull
