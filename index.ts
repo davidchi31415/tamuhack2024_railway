@@ -372,7 +372,7 @@ app.use(express.json());
 
 app.post('/api/submit', async (req, res) => {
   const { jobId } = req.body;
-  await jobQueue.add(`job_${jobId}`, { jobId });
+  await jobQueue.add(`job_${jobId}`, { jobId }, { attempts: 3 });
   res.send("Job queued");
 });
 
