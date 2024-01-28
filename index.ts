@@ -51,6 +51,11 @@ const uploadByteToFile = async ({ data, title }: {data: any, title: string}) => 
   await file.save(contents).then(() => console.log(`Saved ${title}`));
 }
 
+const uploadAudioByteToFile = async ({ data, title }: {data: any, title: string}) => {    
+  const file = bucket.file(title);
+  await file.save(data).then(() => console.log(`Saved ${title}`));
+}
+
 export const checkFileExists = async ({directory, fileName}: any) => {
   const file = bucket.file(`${directory}/${fileName}`);
 
@@ -131,15 +136,16 @@ const getScript = async ({ prompt }: {prompt: string}) => {
   const prompts = extractSentences(promptsString!);
 
   await getImages({ prompts });
+  await getAudios({ story });
 
-  return { story, prompts };
+  return { story: [], prompts: [] };
 }
 
 /////////////////////////////
 // SD API
 /////////////////////////////
 
-const getImage = async ({ prompt, sceneNumber }: {prompt: String, sceneNumber: Number}) => {
+const getImage = async ({ prompt, sceneNumber }: {prompt: string, sceneNumber: number}) => {
   const params = {
     "api": {
       "method": "POST",
@@ -182,10 +188,10 @@ const getImage = async ({ prompt, sceneNumber }: {prompt: String, sceneNumber: N
   });
 }
 
-const getImages = async ({ prompts }: { prompts: String[] }) => {
+const getImages = async ({ prompts }: { prompts: string[] }) => {
   await Promise.all(
     prompts.map((prompt, index) => {
-         return getImage({ prompt, sceneNumber: index });
+      return getImage({ prompt, sceneNumber: index });
     })
  );
 }
@@ -194,7 +200,39 @@ const getImages = async ({ prompts }: { prompts: String[] }) => {
 // ELABS API
 /////////////////////////////
 
+const getAudio = async ({ scene, sceneNumber }: { scene: string, sceneNumber: number }) => {
+  let params = {
+    "model_id": "eleven_monolingual_v1",
+    "text": scene, 
+    "voice_settings": {
+      "similarity_boost": 0.5,
+      "stability": 0.5
+    }
+  };
 
+  await axios.post(
+    "https://api.elevenlabs.io/v1/text-to-speech/XrExE9yKIg1WjnnlVkGX",
+    params, {
+      "headers": {
+        "Content-Type": "application/json",
+        "xi-api-key": `${process.env.ELEVENLABS_API_KEY}`,
+      },
+      "responseType": "arraybuffer"
+    }
+  )
+    .then(async (response) => {
+      await uploadAudioByteToFile({ data: response.data, title: `scene_${sceneNumber}.mp3` });
+    })
+    .catch((err) => console.error(err));
+}
+
+const getAudios = async ({ story }: {story: string[]}) => {
+  await Promise.all(
+    story.map((scene, index) => {
+      return getAudio({ scene, sceneNumber: index });
+    })
+ );
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Bull
@@ -311,4 +349,4 @@ app.listen(port, () => {
   console.log(`Running on port ${port}...`);
 });
 
-getScript({ prompt: "photosynthesis" });
+// getScript({ prompt: "photosynthesis" });
