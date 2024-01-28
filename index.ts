@@ -113,36 +113,8 @@ const jobWorker = new Worker("job",
   async (request: Job) => {
     const { jobId } = request.data;
     
-    
 
-    // await axios.post("https://api.runpod.ai/v2/9afi4omg7sdwt6/run", {
-    //   "input": {   
-    //     "arguments": ""
-    //   }
-    // }, {
-    //   "headers": {
-    //     "Content-Type": "application/json",
-    //     "Authorization": `Bearer ${process.env.RUNPOD_API_KEY}`
-    //   }
-    // })
-    // .then(async (response) => {
-    //   const runpodJobId = response.data.id;
-    //   const status = "IN_PROGRESS";
-    //   await prismadb.convertJob.update({
-    //     where: { id: jobId },
-    //     data: { 
-    //         runpodJobId, 
-    //         status
-    //     }
-    //   }).catch(() => {
-    //     throw new Error("Failed to update database after successfully submitting job to RunPod");
-    //   })
-    // .catch(() => {
-    //     throw new Error("Failed to submit convert job to RunPod"); 
-    //   }); 
-    // });
-
-    return 'Convert request processed successfully';
+    return 'Job processed';
   }, 
   {
     concurrency: 100,
