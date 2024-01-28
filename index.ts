@@ -44,6 +44,13 @@ const storage = new Storage(storageOptions);
 const bucketName = "pusheen";
 const bucket = storage.bucket(bucketName);
 
+const uploadScriptToFile = async ({ script, jobId }: {script: string[], jobId: string}) => {
+  const file = bucket.file(`${jobId}/script.txt`);
+  const contents = script.join("|||||");
+  
+  await file.save(contents).then(() => console.log("Save script.txt"));
+}
+
 const uploadByteToFile = async ({ data, title, jobId }: {data: any, title: string, jobId: string}) => {    
   const file = bucket.file(`${jobId}/${title}`);
   const contents = Buffer.from(data.replace(/^data:image\/(png|gif|jpeg);base64,/, ''), 'base64');
