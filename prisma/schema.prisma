@@ -10,6 +10,7 @@ datasource db {
 
 model Job {
   id             String   @id @default(cuid())
+  prompt         String
   n_scenes       Int      @default(0)
   done_text      Boolean  @default(false)
   done_image     Boolean  @default(false)
