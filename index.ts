@@ -101,9 +101,9 @@ const getScript = async ({ prompt }: {prompt: string}) => {
 
 const redisConnection = { 
   connection: {
-    host: process.env.UPSTASH_REDIS_HOST,
-    port: parseInt(process.env.UPSTASH_REDIS_PORT as string),
-    password: process.env.UPSTASH_REDIS_PASSWORD
+    host: process.env.REDIS_HOST,
+    port: parseInt(process.env.REDIS_PORT as string),
+    password: process.env.REDIS_PASSWORD
   }
 };
 
@@ -115,32 +115,32 @@ const jobWorker = new Worker("job",
     
     
 
-    await axios.post("https://api.runpod.ai/v2/9afi4omg7sdwt6/run", {
-      "input": {   
-        "arguments": ""
-      }
-    }, {
-      "headers": {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.RUNPOD_API_KEY}`
-      }
-    })
-    .then(async (response) => {
-      const runpodJobId = response.data.id;
-      const status = "IN_PROGRESS";
-      await prismadb.convertJob.update({
-        where: { id: jobId },
-        data: { 
-            runpodJobId, 
-            status
-        }
-      }).catch(() => {
-        throw new Error("Failed to update database after successfully submitting job to RunPod");
-      })
-    .catch(() => {
-        throw new Error("Failed to submit convert job to RunPod"); 
-      }); 
-    });
+    // await axios.post("https://api.runpod.ai/v2/9afi4omg7sdwt6/run", {
+    //   "input": {   
+    //     "arguments": ""
+    //   }
+    // }, {
+    //   "headers": {
+    //     "Content-Type": "application/json",
+    //     "Authorization": `Bearer ${process.env.RUNPOD_API_KEY}`
+    //   }
+    // })
+    // .then(async (response) => {
+    //   const runpodJobId = response.data.id;
+    //   const status = "IN_PROGRESS";
+    //   await prismadb.convertJob.update({
+    //     where: { id: jobId },
+    //     data: { 
+    //         runpodJobId, 
+    //         status
+    //     }
+    //   }).catch(() => {
+    //     throw new Error("Failed to update database after successfully submitting job to RunPod");
+    //   })
+    // .catch(() => {
+    //     throw new Error("Failed to submit convert job to RunPod"); 
+    //   }); 
+    // });
 
     return 'Convert request processed successfully';
   }, 
